@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}
+Book Appointment
+{% endblock %}
+
+{% block content %}
+
+<h1>Book Appointment</h1>
+
+<p>
+    Doctor: {{ slot.doctor.name }}
+</p>
+
+<p>
+    Speciality: {{ slot.doctor.speciality }}
+</p>
+
+<p>
+    Date: {{ slot.date }}
+</p>
+
+<p>
+    Time: {{ slot.time|time:"g:i A" }}
+</p>
+
+<form method="post">
+    {% csrf_token %}
+ <div class="mb-3">
+        <label for="reason" class="form-label">
+            Reason for appointment
+        </label>
+
+        <textarea
+            id="reason"
+            name="reason"
+            class="form-control"
+            rows="4"
+            placeholder="Please enter the reason for your appointment..."
+            required
+        ></textarea>
+    </div>
+
+    <button type="submit">
+        Confirm Booking
+    </button>
+</form>
+
+{% endblock %}
