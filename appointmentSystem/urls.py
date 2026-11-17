@@ -8,6 +8,7 @@ urlpatterns = [
     path('api/doctors/', views.DoctorListAPIView.as_view(), name='api_doctors'),
     path('api/slots/', views.AppointmentSlotListAPIView.as_view(), name='api_slots'),
     path('api/appointments/', views.PatientAppointmentListAPIView.as_view(), name='api_appointments'),
+    path('api/appointments/book/', views.AppointmentCreateAPIView.as_view(), name='api_book_appointment'),
 
     path('', views.home, name='home'),
     path("register/", views.register, name="register"),

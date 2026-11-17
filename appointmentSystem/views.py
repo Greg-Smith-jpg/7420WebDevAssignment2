@@ -4,12 +4,14 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.db import transaction
 from .forms import DoctorForm, AppointmentBookingForm, AppointmentReasonForm
 from .models import Doctor, Appointment, AppointmentSlot
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from .serializers import DoctorSerializer,AppointmentSlotSerializer, AppointmentSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ValidationError
 
 
 
@@ -30,11 +32,22 @@ class PatientAppointmentListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Appointment.objects.filter(
-            patient=self.request.user
-        ).select_related(
-            'appointment_slot__doctor'
-        )
+        return Appointment.objects.filter(patient=self.request.user).select_related('appointment_slot__doctor')
+
+class AppointmentCreateAPIView(generics.CreateAPIView):
+    serializer_class = AppointmentSerializer
+    permission_classes = [IsAuthenticated]
+    @transaction.atomic
+    def perform_create(self, serializer):
+        slot_id = self.request.data.get('appointment_slot')
+        try: slot = AppointmentSlot.objects.select_for_update().get(pk=slot_id)
+        except Exception as e:
+            raise ValidationError({'appointment_slot': 'An error occurred, please try again.'})
+        if not slot.is_available:
+            raise ValidationError({'appointment_slot': 'This appointment is no longer available'})
+        slot.is_available = False
+        slot.save(update_fields=['is_available'])
+        serializer.save(patient=self.request.user,appointment_slot=slot)
 
 def home(request):
     return render(request, 'appointmentSystem/home.html')
