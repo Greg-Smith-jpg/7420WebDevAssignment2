@@ -6,9 +6,35 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .forms import DoctorForm, AppointmentBookingForm, AppointmentReasonForm
 from .models import Doctor, Appointment, AppointmentSlot
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from .serializers import DoctorSerializer,AppointmentSlotSerializer, AppointmentSerializer
+from rest_framework.permissions import IsAuthenticated
+
 
 
 # Create your views here.
+
+class DoctorListAPIView(generics.ListAPIView):
+    queryset = Doctor.objects.all()
+    serializer_class = DoctorSerializer
+    permission_classes = [AllowAny]
+
+class AppointmentSlotListAPIView(generics.ListAPIView):
+    queryset = AppointmentSlot.objects.all()
+    serializer_class = AppointmentSlotSerializer
+    permission_classes = [AllowAny]
+
+class PatientAppointmentListAPIView(generics.ListAPIView):
+    serializer_class = AppointmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Appointment.objects.filter(
+            patient=self.request.user
+        ).select_related(
+            'appointment_slot__doctor'
+        )
 
 def home(request):
     return render(request, 'appointmentSystem/home.html')
