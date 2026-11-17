@@ -13,6 +13,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +29,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "pikiora-70zh.onrender.com",
+    "*",
 ]
 
 # Application definition
@@ -82,14 +83,11 @@ WSGI_APPLICATION = 'pikiora.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('PGDATABASE'),
-        'USER': os.getenv('PGUSER'),
-        'PASSWORD': os.getenv('PGPASSWORD'),
-        'HOST': os.getenv('PGHOST'),
-        'PORT': os.getenv('PGPORT'),
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 
 
