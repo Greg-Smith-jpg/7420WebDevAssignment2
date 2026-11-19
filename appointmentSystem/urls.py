@@ -9,6 +9,10 @@ urlpatterns = [
     path('api/slots/', views.AppointmentSlotListAPIView.as_view(), name='api_slots'),
     path('api/appointments/', views.PatientAppointmentListAPIView.as_view(), name='api_appointments'),
     path('api/appointments/book/', views.AppointmentCreateAPIView.as_view(), name='api_book_appointment'),
+    path('api/appointments/<int:pk>/cancel/',views.AppointmentCancelAPIView.as_view(),name='api_cancel_appointment'),
+    path('api/appointments/<int:pk>/edit-reason/',views.AppointmentEditReasonAPIView.as_view(),name='api_edit_appointment_reason'),
+    path('api/admin/users/',views.AdminUserListAPIView.as_view(),name='api_admin_users'),
+
 
     path('', views.home, name='home'),
     path("register/", views.register, name="register"),

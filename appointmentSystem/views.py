@@ -9,7 +9,7 @@ from .forms import DoctorForm, AppointmentBookingForm, AppointmentReasonForm
 from .models import Doctor, Appointment, AppointmentSlot
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
-from .serializers import DoctorSerializer,AppointmentSlotSerializer, AppointmentSerializer
+from .serializers import(DoctorSerializer,AppointmentSlotSerializer,AppointmentSerializer,AppointmentReasonSerializer,AdminUserSerializer)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 
@@ -17,6 +17,13 @@ from rest_framework.exceptions import ValidationError
 
 # Create your views here.
 
+class AdminUserListAPIView(generics.ListAPIView):
+    serializer_class = AdminUserSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return User.objects.none()
+        return  User.objects.all().order_by('id')
 class DoctorListAPIView(generics.ListAPIView):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
@@ -34,6 +41,20 @@ class PatientAppointmentListAPIView(generics.ListAPIView):
     def get_queryset(self):
         return Appointment.objects.filter(patient=self.request.user).select_related('appointment_slot__doctor')
 
+class AppointmentCancelAPIView(generics.UpdateAPIView):
+    serializer_class = AppointmentSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        return Appointment.objects.filter(patient=self.request.user).select_related('appointment_slot__doctor')
+    @transaction.atomic
+    def perform_update(self, serializer):
+        appointment = serializer.instance
+        if appointment.status != "Booked":
+            raise ValidationError({'status': 'This appointment is not currently booked'})
+        appointment.appointment_slot.is_available = True
+        appointment.appointment_slot.save(update_fields=['is_available'])
+        serializer.save(status="Cancelled")
+
 class AppointmentCreateAPIView(generics.CreateAPIView):
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated]
@@ -48,6 +69,14 @@ class AppointmentCreateAPIView(generics.CreateAPIView):
         slot.is_available = False
         slot.save(update_fields=['is_available'])
         serializer.save(patient=self.request.user,appointment_slot=slot)
+
+class AppointmentEditReasonAPIView(generics.UpdateAPIView):
+    serializer_class = AppointmentReasonSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        return Appointment.objects.filter(
+            patient = self.request.user, status = "Booked"
+        )
 
 def home(request):
     return render(request, 'appointmentSystem/home.html')
