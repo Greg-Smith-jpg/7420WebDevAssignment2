@@ -1,4 +1,4 @@
-
+from django.contrib.auth.decorators import user_passes_test
 from rest_framework import serializers
 from .models import Doctor, AppointmentSlot, Appointment
 from django.contrib.auth.models import User
@@ -26,14 +26,38 @@ class AdminUserSerializer(serializers.ModelSerializer):
             return "Doctor"
         else:
             return "Patient"
-
-
-class AdminUserSerializer(serializers.ModelSerializer):
-    role = serializers.SerializerMethodField()
+class AdminDoctorSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=8)
     class Meta:
+        model = Doctor
         fields = [
-
+            'id',
+            'name',
+            'speciality',
+            'email',
+            'phone',
+            'description',
+            'username',
+            'password'
         ]
+        read_only_fields = ['id']
+    def create(self, validated_data):
+        username = validated_data.pop('username')
+        password = validated_data.pop('password')
+        user = User.objects.create_user(
+            username=username,
+            email=validated_data['email'],
+            password=password
+        )
+        doctor = Doctor.objects.create(
+            user=user,
+            **validated_data
+        )
+        return doctor
+
+
+
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
@@ -56,5 +80,10 @@ class AppointmentReasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = ['reason']
+
+class AdminPatientStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['is_active']
 
 

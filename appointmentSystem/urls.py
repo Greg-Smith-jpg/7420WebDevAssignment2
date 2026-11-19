@@ -12,7 +12,16 @@ urlpatterns = [
     path('api/appointments/<int:pk>/cancel/',views.AppointmentCancelAPIView.as_view(),name='api_cancel_appointment'),
     path('api/appointments/<int:pk>/edit-reason/',views.AppointmentEditReasonAPIView.as_view(),name='api_edit_appointment_reason'),
     path('api/admin/users/',views.AdminUserListAPIView.as_view(),name='api_admin_users'),
-
+    path('api/admin/doctors/add/',views.AdminDoctorCreateAPIView.as_view(),name='api_add_doctor'),
+    path('api/doctors/<int:pk>/',views.DoctorUpdateAPIView.as_view(),name='api_update_doctor'),
+    path('api/admin/doctors/<int:pk>/delete/',views.AdminDoctorDeleteAPIView.as_view(),name='api_delete_doctor'),
+    path('api/admin/slots/add/',views.AdminSlotCreateAPIView.as_view(),name='api_add_slot'),
+    path('api/admin/slots/<int:pk>/update/',views.AdminSlotUpdateAPIView.as_view(),name='api_update_slot'),
+    path('api/admin/slots/<int:pk>/delete/',views.AdminSlotDeleteAPIView.as_view(),name='api_delete_slot'),
+    path('api/admin/appointments/',views.AdminAppointmentListAPIView.as_view(),name='api_admin_appointments'),
+    path('api/admin/appointments/<int:pk>/update/',views.AdminAppointmentUpdateAPIView.as_view(),name='api_admin_update_appointment'),
+    path('api/admin/appointments/<int:pk>/cancel/',views.AdminAppointmentCancelAPIView.as_view(),name='api_admin_cancel_appointment'),
+    path('api/admin/patients/<int:pk>/status/',views.AdminPatientStatusUpdateAPIView.as_view(),name='api_admin_patient_status'),
 
     path('', views.home, name='home'),
     path("register/", views.register, name="register"),
