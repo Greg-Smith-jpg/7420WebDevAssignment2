@@ -24,3 +24,6 @@ media/
 # Operating system
 .DS_Store
 Thumbs.db
+
+# Node.js
+node_modules/
