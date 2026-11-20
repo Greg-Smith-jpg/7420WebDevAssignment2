@@ -71,10 +71,23 @@ class AppointmentSlotSerializer(serializers.ModelSerializer):
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
+    appointment_slot_details = serializers.SerializerMethodField()
+    patient_username = serializers.CharField(source='patient.username', read_only=True)
     class Meta:
         model = Appointment
         fields = '__all__'
         read_only_fields = ('patient', 'created_at', 'status')
+
+    def get_appointment_slot_details(self, obj):
+        return {
+            'doctor': {
+                'name': obj.appointment_slot.doctor.name,
+                'speciality': obj.appointment_slot.doctor.speciality
+            },
+            'date': obj.appointment_slot.date,
+            'time': obj.appointment_slot.time
+        }
+
 
 class AppointmentReasonSerializer(serializers.ModelSerializer):
     class Meta:
@@ -86,4 +99,18 @@ class AdminPatientStatusSerializer(serializers.ModelSerializer):
         model = User
         fields = ['is_active']
 
+class PatientRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=3)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password']
+        )
+
+        return user
 
