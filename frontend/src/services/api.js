@@ -2,7 +2,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api/'
+    baseURL: 'https://piki-ora-medical-centre-144777.onrender.com/api/'
 })
 
 api.interceptors.request.use(function (config) {
@@ -29,8 +29,7 @@ api.interceptors.response.use(
 
             if (refreshToken !== null) {
                 try {
-                    const response = await axios.post(
-                        'http://127.0.0.1:8000/api/token/refresh/',
+                    const response = await axios.post('https://piki-ora-medical-centre-144777.onrender.com/api/token/refresh/',
                         {
                             refresh: refreshToken
                         }
